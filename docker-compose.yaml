@@ -1,0 +1,47 @@
+services:
+  sipp-base:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        DEBIAN_VERSION: ${DEBIAN_VERSION:-bullseye}
+        SIPP_VERSION: ${SIPP_VERSION:-"v3.7.3"}
+        BUILD_FLAGS: ${BUILD_FLAGS:-"SSL,PCAP,GSL"}
+    container_name: sipp-base
+    tty: true
+    privileged: true
+    platform: linux/amd64
+
+  sipp-builder:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        DEBIAN_VERSION: ${DEBIAN_VERSION:-bullseye}
+        SIPP_VERSION: ${SIPP_VERSION:-"v3.7.3"}
+        BUILD_FLAGS: ${BUILD_FLAGS:-"SSL,PCAP,GSL"}
+    container_name: sipp-builder
+    tty: true
+    privileged: true
+    platform: linux/amd64
+
+  sipp:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        DEBIAN_VERSION: ${DEBIAN_VERSION:-bullseye}
+        SIPP_VERSION: ${SIPP_VERSION:-"v3.7.3"}
+        BUILD_FLAGS: ${BUILD_FLAGS:-"SSL,PCAP,GSL"}
+    container_name: sipp
+    hostname: sipp
+    volumes:
+      - ./sipp-scenarios/:${SIPP_SCENARIOS_LOCATION}
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
+    tty: true
+    privileged: true
+    platform: linux/amd64
