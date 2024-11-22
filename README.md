@@ -22,7 +22,7 @@ SIPp with Docker Compose support
 ### Build image
 
 ```sh
-docker compose build
+docker compose build sipp
 ```
 
 ### Run Container
@@ -37,6 +37,7 @@ docker compose up sipp
 
 ```sh
 docker compose run sipp sipp -i 10.0.0.1 -p 5060 10.0.0.2:5060 -r 1 -m 1 -sf /opt/options/options.xml
+docker compose run sipp sipp -i 172.25.0.1 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/register/register.xml -inf /opt/register/register.csv
 ```
 
 #### Execute SIPp scenario - inside container
