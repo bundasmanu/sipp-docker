@@ -12,10 +12,8 @@
             Call-ID: [call_id]
             CSeq: 1 OPTIONS
             Contact: <sip:[local_ip]:[local_port]>
-            Allow: INVITE, ACK, BYE, OPTIONS, CANCEL, UPDATE, SUBSCRIBE, NOTIFY, INFO, MESSAGE
             Max-Forwards: 70
             User-Agent: SIPp Test
-            Expires: 3600
             Content-Length: 0
         ]]>
     </send>
