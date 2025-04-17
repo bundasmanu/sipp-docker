@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<scenario name="uas_simple_scenario">
+
+    <!-- INITIAL INVITE reception -->
+    <recv request="INVITE" crlf="true" rrs="true">
+        <action>
+            <ereg regexp="&lt;.*&gt;" search_in="hdr" header="Record-Route" assign_to="uac_RR_uri"/>
+        </action>
+    </recv>
+
+    <nop>
+        <action>
+            <assignstr assign_to="full_vias" value="[last_Via:]"/>
+            <assignstr assign_to="cseq_value" value="[last_Cseq:]"/>
+        </action>
+    </nop>
+
+    <!-- send provisional response -->
+    <send>
+        <![CDATA[
+            SIP/2.0 180 Ringing
+            [last_Via:]
+            [last_From:]
+            [last_To:];tag=[pid]SIPpTag01[call_number]
+            [last_Call-ID:]
+            [last_CSeq:]
+            [last_Record-Route:]
+            [last_Route:]
+            Contact: <sip:[field0]@[local_ip]:[local_port];transport=[transport]>
+            Content-Length: [len]
+        ]]>
+    </send>
+
+    <!-- reception of CANCEL -->
+    <recv request="CANCEL" rtd="true" crlf="true">
+        <action>
+            <ereg regexp="SIP.*" search_in="hdr" header="Via" assign_to="hop_by_hop_via"/>
+        </action>
+    </recv>
+
+    <send>
+        <![CDATA[
+            SIP/2.0 200 OK
+            Via: [$hop_by_hop_via]
+            [last_From:]
+            [last_To:];tag=[pid]SIPpTag01[call_number]
+            [last_Call-ID:]
+            [last_CSeq:]
+            Content-Length: [len]
+        ]]>
+    </send>
+
+    <send>
+        <![CDATA[
+            SIP/2.0 487 Request Terminated
+            [$full_vias]
+            Record-Route: [$uac_RR_uri]
+            [last_From:]
+            [last_To:];tag=[pid]SIPpTag01[call_number]
+            [last_Call-ID:]
+            [$cseq_value]
+            Content-Length: [len]
+        ]]>
+    </send>
+
+    <recv request="ACK" rtd="true" crlf="true"/>
+
+    <!-- definition of the response time repartition table (unit is ms)   -->
+    <ResponseTimeRepartition value="10, 20, 30, 40, 50, 100, 150, 200"/>
+
+    <!-- definition of the call length repartition table (unit is ms)     -->
+    <CallLengthRepartition value="10, 50, 100, 500, 1000, 5000, 10000"/>
+
+</scenario>
+
