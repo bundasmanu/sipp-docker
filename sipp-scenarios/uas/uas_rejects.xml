@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<scenario name="uas_simple_scenario">
+
+    <!-- INITIAL INVITE reception -->
+    <recv request="INVITE" crlf="true" rrs="true"/>
+
+    <!-- send provisional response -->
+    <send>
+        <![CDATA[
+            SIP/2.0 603 Decline
+            [last_Via:]
+            [last_From:]
+            [last_To:];tag=[pid]SIPpTag01[call_number]
+            [last_Call-ID:]
+            [last_CSeq:]
+            [last_Record-Route:]
+            [last_Route:]
+            Contact: <sip:[field0]@[local_ip]:[local_port];transport=[transport]>
+            Content-Length: [len]
+        ]]>
+    </send>
+
+    <!-- reception of ACK -->
+    <recv request="ACK" rtd="true" crlf="true"/>
+
+    <!-- definition of the response time repartition table (unit is ms)   -->
+    <ResponseTimeRepartition value="10, 20, 30, 40, 50, 100, 150, 200"/>
+
+    <!-- definition of the call length repartition table (unit is ms)     -->
+    <CallLengthRepartition value="10, 50, 100, 500, 1000, 5000, 10000"/>
+
+</scenario>
