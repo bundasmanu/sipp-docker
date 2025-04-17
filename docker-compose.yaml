@@ -37,7 +37,9 @@ services:
     hostname: sipp
     volumes:
       - ./sipp-scenarios/:${SIPP_SCENARIOS_LOCATION}
-    network_mode: host
+    networks:
+      common-network:
+        ipv4_address: 172.25.0.12
     cap_add:
       - NET_ADMIN
       - SYS_TIME
@@ -45,3 +47,7 @@ services:
     tty: true
     privileged: true
     platform: linux/amd64
+
+networks:
+  common-network:
+    external: true
