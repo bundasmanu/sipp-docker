@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<scenario name="uas_simple_scenario">
+
+    <!-- INITIAL INVITE reception -->
+    <recv request="INVITE" crlf="true" rrs="true">
+        <action>
+            <ereg regexp="&quot;.*" search_in="hdr" header="From" assign_to="uac_from_uri"/>
+            <ereg regexp="&lt;.*&gt;" search_in="hdr" header="Record-Route" assign_to="uac_RR_uri"/>
+            <ereg regexp="sip.*" search_in="hdr" header="Contact" assign_to="uac_ct_uri"/>
+        </action>
+    </recv>
+
+    <!-- send provisional response -->
+    <send>
+        <![CDATA[
+            SIP/2.0 180 Ringing
+            [last_Via:]
+            [last_From:]
+            [last_To:];tag=[pid]SIPpTag01[call_number]
+            [last_Call-ID:]
+            [last_CSeq:]
+            [last_Record-Route:]
+            [last_Route:]
+            Contact: <sip:[field0]@[local_ip]:[local_port];transport=[transport]>
+            Content-Length: [len]
+        ]]>
+    </send>
+
+    <!-- send sucess response -->
+    <send retrans="500">
+        <![CDATA[
+            SIP/2.0 200 OK
+            [last_Via:]
+            [last_From:]
+            [last_To:];tag=[pid]SIPpTag00[call_number]
+            [last_Call-ID:]
+            [last_CSeq:]
+            [last_Record-Route:]
+            [last_Route:]
+            Contact: <sip:[field0]@[local_ip]:[local_port];transport=[transport]>
+            Content-Type: application/sdp
+            Content-Length: [len]
+
+            v=0
+            o=user1 53655765 2353687637 IN IP[local_ip_type] [local_ip]
+            s=-
+            c=IN IP[media_ip_type] [media_ip]
+            t=0 0
+            m=audio [media_port] RTP/AVP 8 101
+            a=rtpmap:8 PCMA/8000
+            a=rtpmap:101 telephone-event/8000
+        ]]>
+    </send>
+
+    <!-- reception of ACK -->
+    <recv request="ACK" rtd="true" crlf="true"/>
+
+    <!-- Now, actually RTP Flows between UAC and UAS -->
+    <send retrans="500">
+        <![CDATA[
+            BYE [$uac_ct_uri] SIP/2.0
+            Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+            Route: [$uac_RR_uri]
+            From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag01[call_number]
+            To: [$uac_from_uri]
+            Call-ID: [call_id]
+            CSeq: [cseq] BYE
+            Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
+            Contact: sip:[field0]@[local_ip]:[local_port]
+            Max-Forwards: 70
+            Subject: Ficticious Test
+            User-Agent: sipp
+            Content-Length: 0
+        ]]>
+    </send>
+
+    <recv response="200" crlf="true"></recv>
+
+    <!-- definition of the response time repartition table (unit is ms)   -->
+    <ResponseTimeRepartition value="10, 20, 30, 40, 50, 100, 150, 200"/>
+
+    <!-- definition of the call length repartition table (unit is ms)     -->
+    <CallLengthRepartition value="10, 50, 100, 500, 1000, 5000, 10000"/>
+
+</scenario>
