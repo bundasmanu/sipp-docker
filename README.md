@@ -15,6 +15,7 @@ SIPp with Docker Compose support
   - [UAC cancels](#uac-cancels)
   - [UAC Re-Invites](#uac-re-invites)
   - [UAC as internal](#uac-as-internal)
+  - [UAC as internal with audio on both sides](#uac-as-internal-with-audio-on-both-sides)
   - [UAC as provider](#uac-as-provider)
 
 ## What offers?
@@ -94,6 +95,14 @@ docker compose run sipp sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -s
 docker compose run sipp sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uac/uac.xml -inf /opt/uac/uac_from_internal.csv -nd
 
 docker compose run sipp sipp -i 172.25.0.10 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uas/uas.xml -inf /opt/uas/uas.csv -nd
+```
+
+## UAC as internal with audio on both sides
+
+```sh
+docker compose run sipp sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uac/uac_with_audio.xml -inf /opt/uac/uac_from_internal.csv -nd
+
+docker compose run sipp sipp -i 172.25.0.10 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uas/uas_with_audio.xml -inf /opt/uas/uas.csv -nd
 ```
 
 ## UAC as provider
