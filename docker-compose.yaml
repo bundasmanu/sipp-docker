@@ -37,6 +37,7 @@ services:
     hostname: sipp
     volumes:
       - ./sipp-scenarios/:${SIPP_SCENARIOS_LOCATION}
+      - ./audios/:${SIPP_SCENARIOS_LOCATION}/audios
     networks:
       common-network:
         ipv4_address: 172.25.0.12
