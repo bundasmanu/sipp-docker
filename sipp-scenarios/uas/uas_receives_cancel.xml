@@ -2,14 +2,11 @@
 <scenario name="uas_simple_scenario">
 
     <!-- INITIAL INVITE reception -->
-    <recv request="INVITE" crlf="true" rrs="true">
-        <action>
-            <ereg regexp="&lt;.*&gt;" search_in="hdr" header="Record-Route" assign_to="uac_RR_uri"/>
-        </action>
-    </recv>
+    <recv request="INVITE" crlf="true" rrs="true"/>
 
     <nop>
         <action>
+            <assignstr assign_to="full_RR" value="[routes]"/>
             <assignstr assign_to="full_vias" value="[last_Via:]"/>
             <assignstr assign_to="cseq_value" value="[last_Cseq:]"/>
         </action>
@@ -54,7 +51,7 @@
         <![CDATA[
             SIP/2.0 487 Request Terminated
             [$full_vias]
-            Record-Route: [$uac_RR_uri]
+            [$full_RR]
             [last_From:]
             [last_To:];tag=[pid]SIPpTag01[call_number]
             [last_Call-ID:]

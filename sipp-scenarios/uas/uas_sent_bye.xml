@@ -5,8 +5,6 @@
     <recv request="INVITE" crlf="true" rrs="true">
         <action>
             <ereg regexp="&quot;.*" search_in="hdr" header="From" assign_to="uac_from_uri"/>
-            <ereg regexp="&lt;.*&gt;" search_in="hdr" header="Record-Route" occurrence="1" assign_to="rr_1"/>
-            <ereg regexp="&lt;.*&gt;" search_in="hdr" header="Record-Route" occurrence="2" assign_to="rr_2"/>
             <ereg regexp="sip.*" search_in="hdr" header="Contact" assign_to="uac_ct_uri"/>
         </action>
     </recv>
@@ -56,13 +54,18 @@
     <!-- reception of ACK -->
     <recv request="ACK" rtd="true" crlf="true"/>
 
+    <nop>
+        <action>
+            <assignstr assign_to="full_route" value="[routes]"/>
+        </action>
+    </nop>
+
     <!-- Now, actually RTP Flows between UAC and UAS -->
     <send retrans="500">
         <![CDATA[
             BYE [$uac_ct_uri] SIP/2.0
             Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
-            Route: [$rr_1]
-            Route: [$rr_2]
+            [$full_route]
             From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag01[call_number]
             To: [$uac_from_uri]
             Call-ID: [call_id]
