@@ -15,7 +15,7 @@
             [last_CSeq:]
             [last_Record-Route:]
             [last_Route:]
-            Contact: <sip:[field0]@[local_ip]:[local_port];transport=[transport]>
+            Contact: <sip:sipp@[local_ip]:[local_port];transport=[transport]>
             Content-Type: application/sdp
             Content-Length: [len]
         ]]>

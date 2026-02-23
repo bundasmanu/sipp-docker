@@ -36,6 +36,7 @@
     <recv response="200" rrs="true" rtd="true">
         <action>
             <ereg regexp=";tag.*" search_in="hdr" header="To" assign_to="to_tag"/>
+            <ereg regexp="sip.*" search_in="hdr" header="Contact" assign_to="uac_ct_uri"/>
         </action>
     </recv>
 
@@ -60,7 +61,7 @@
 
     <send retrans="500">
         <![CDATA[
-            INVITE sip:[field3]@[field4] SIP/2.0
+            INVITE [$uac_ct_uri] SIP/2.0
             [routes]
             Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
             From: "[field0]" <sip:[field0]@[field1]>;tag=[call_number]
