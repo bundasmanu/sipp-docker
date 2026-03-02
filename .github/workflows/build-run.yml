@@ -49,4 +49,9 @@ jobs:
             SIPP_SCENARIOS_LOCATION=${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}
 
       - name: Run Docker image
-        run: docker run --rm --env-file .env -v "$PWD/sipp-scenarios/:${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}"  -v "$PWD/audios/:${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}/audios" sipp:latest sipp -v
+        run: |
+          docker run --rm --env-file .env -v "$PWD/sipp-scenarios/:${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}"  -v "$PWD/audios/:${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}/audios" sipp:latest sipp -v
+          code=$?
+          if [ "$code" -ne 99 ]; then
+            exit $code
+          fi
