@@ -5,11 +5,15 @@ SIPp with Docker Compose support
 - [sipp-docker](#sipp-docker)
   - [What offers?](#what-offers)
   - [How can i use it?](#how-can-i-use-it)
-    - [Build image](#build-image)
-    - [Run Container](#run-container)
-      - [Without arguments (for checking only if SIPp is available - outputs version info)](#without-arguments-for-checking-only-if-sipp-is-available---outputs-version-info)
-      - [Execute SIPp scenario - from local terminal](#execute-sipp-scenario---from-local-terminal)
-      - [Execute SIPp scenario - inside container](#execute-sipp-scenario---inside-container)
+    - [Use Image directly](#use-image-directly)
+      - [Build Image](#build-image)
+      - [Run Image](#run-image)
+    - [Docker-Compose](#docker-compose)
+      - [Build image](#build-image-1)
+      - [Run Container](#run-container)
+        - [Without arguments (for checking only if SIPp is available - outputs version info)](#without-arguments-for-checking-only-if-sipp-is-available---outputs-version-info)
+        - [Execute SIPp scenario - from local terminal](#execute-sipp-scenario---from-local-terminal)
+        - [Execute SIPp scenario - inside container](#execute-sipp-scenario---inside-container)
   - [Reject Scenario](#reject-scenario)
   - [UAS sends BYE Scenario](#uas-sends-bye-scenario)
   - [UAC cancels](#uac-cancels)
@@ -26,30 +30,86 @@ SIPp with Docker Compose support
 
 ## How can i use it?
 
-### Build image
+### Use Image directly
+
+#### Build Image
+
+Build the Docker image with the specified build arguments from `.env`:
+
+```sh
+docker build \
+  --target sipp \
+  --build-arg DEBIAN_VERSION=trixie \
+  --build-arg SIPP_VERSION=v3.7.7 \
+  --build-arg BUILD_FLAGS=SSL,PCAP,GSL \
+  --build-arg SIPP_SCENARIOS_LOCATION=/opt \
+  -t sipp:latest .
+```
+
+#### Run Image
+
+Run a container using the built image with version check:
+
+```sh
+docker run --rm sipp:latest sipp -v
+```
+
+Run a container with mounted scenarios and audios volumes:
+
+```sh
+docker run --rm \
+  --env-file .env \
+  -v "$PWD/sipp-scenarios/:/opt" \
+  -v "$PWD/audios/:/opt/audios" \
+  sipp:latest sipp -v
+```
+
+Run a SIPp scenario from the mounted volumes:
+
+```sh
+docker run --rm \
+  --env-file .env \
+  -v "$PWD/sipp-scenarios/:/opt" \
+  -v "$PWD/audios/:/opt/audios" \
+  sipp:latest sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/register/register.xml -inf /opt/register/register.csv
+```
+
+Run a container in interactive shell mode:
+
+```sh
+docker run --rm -it \
+  --env-file .env \
+  -v "$PWD/sipp-scenarios/:/opt" \
+  -v "$PWD/audios/:/opt/audios" \
+  sipp:latest shell
+```
+
+### Docker-Compose
+
+#### Build image
 
 ```sh
 docker compose build sipp
 ```
 
-### Run Container
+#### Run Container
 
-#### Without arguments (for checking only if SIPp is available - outputs version info)
+##### Without arguments (for checking only if SIPp is available - outputs version info)
 
 ```sh
 docker compose up sipp
 ```
 
-#### Execute SIPp scenario - from local terminal
+##### Execute SIPp scenario - from local terminal
 
 ```sh
-docker compose run sipp sipp -i 172.25.0.1 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/options/options.xml
-docker compose run sipp sipp -i 172.25.0.1 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/register/register.xml -inf /opt/register/register.csv
+docker compose run sipp sipp -i 172.25.0.10 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/options/options.xml
+docker compose run sipp sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/register/register.xml -inf /opt/register/register.csv
 docker compose run sipp sipp -i 172.25.0.10 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uac/uac.xml -inf /opt/uac/uac.csv -nd
 docker compose run sipp sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uas/uas.xml -inf /opt/uas/uas.csv -nd
 ```
 
-#### Execute SIPp scenario - inside container
+##### Execute SIPp scenario - inside container
 
 ```sh
 docker compose run sipp shell
