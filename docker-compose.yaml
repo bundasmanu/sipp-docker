@@ -4,8 +4,8 @@ services:
       context: ./
       dockerfile: Dockerfile
       args:
-        DEBIAN_VERSION: ${DEBIAN_VERSION:-bullseye}
-        SIPP_VERSION: ${SIPP_VERSION:-"v3.7.3"}
+        DEBIAN_VERSION: ${DEBIAN_VERSION:-trixie}
+        SIPP_VERSION: ${SIPP_VERSION:-"v3.7.7"}
         BUILD_FLAGS: ${BUILD_FLAGS:-"SSL,PCAP,GSL"}
     container_name: sipp-base
     tty: true
@@ -17,8 +17,8 @@ services:
       context: ./
       dockerfile: Dockerfile
       args:
-        DEBIAN_VERSION: ${DEBIAN_VERSION:-bullseye}
-        SIPP_VERSION: ${SIPP_VERSION:-"v3.7.3"}
+        DEBIAN_VERSION: ${DEBIAN_VERSION:-trixie}
+        SIPP_VERSION: ${SIPP_VERSION:-"v3.7.7"}
         BUILD_FLAGS: ${BUILD_FLAGS:-"SSL,PCAP,GSL"}
     container_name: sipp-builder
     tty: true
@@ -30,8 +30,8 @@ services:
       context: ./
       dockerfile: Dockerfile
       args:
-        DEBIAN_VERSION: ${DEBIAN_VERSION:-bullseye}
-        SIPP_VERSION: ${SIPP_VERSION:-"v3.7.3"}
+        DEBIAN_VERSION: ${DEBIAN_VERSION:-trixie}
+        SIPP_VERSION: ${SIPP_VERSION:-"v3.7.7"}
         BUILD_FLAGS: ${BUILD_FLAGS:-"SSL,PCAP,GSL"}
     container_name: sipp
     hostname: sipp
