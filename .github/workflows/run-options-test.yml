@@ -1,99 +1,43 @@
-name: Run Options against a target
-
-on:
-  workflow_dispatch:
-    inputs:
-      remote_target:
-        description: 'Remote Target IP:Port to send SIP OPTIONS request'
-        required: false
-        default: '127.0.0.1:5060'
-        type: string
-      num_reqs:
-        description: 'Number reqs to sent'
-        required: false
-        default: '1'
-        type: string
-      call_rate:
-        description: 'Number Reqs per seconds'
-        required: false
-        default: '1'
-        type: string
-      call_period:
-        description: 'Rate period for call_rate'
-        required: false
-        default: '1000'
-        type: string
-  workflow_call:
-    inputs:
-      remote_target:
-        description: 'Remote Target IP:Port to send SIP OPTIONS request'
-        required: false
-        default: '127.0.0.1:5060'
-        type: string
-      num_reqs:
-        description: 'Number reqs to sent'
-        required: false
-        default: '1'
-        type: string
-      call_rate:
-        description: 'Number Reqs per seconds'
-        required: false
-        default: '1'
-        type: string
-      call_period:
-        description: 'Rate period for call_rate'
-        required: false
-        default: '1000'
-        type: string
-
-jobs:
-
-  load-env-vars:
-    runs-on: ubuntu-latest
-    outputs:
-      DEBIAN_VERSION: ${{ env.DEBIAN_VERSION }}
-      SIPP_VERSION: ${{ env.SIPP_VERSION }}
-      BUILD_FLAGS: ${{ env.BUILD_FLAGS }}
-      SIPP_SCENARIOS_LOCATION: ${{ env.SIPP_SCENARIOS_LOCATION }}
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Load environment variables from .env
-        run: grep -v '^#' .env | grep -v '^$' >> $GITHUB_ENV
-
-  sipp-build-run-options:
-    needs: load-env-vars
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          target: sipp
-          push: false
-          load: true
-          tags: sipp:latest
-          platforms: linux/amd64
-          build-args: |
-            DEBIAN_VERSION=${{ needs.load-env-vars.outputs.DEBIAN_VERSION }}
-            SIPP_VERSION=${{ needs.load-env-vars.outputs.SIPP_VERSION }}
-            BUILD_FLAGS=${{ needs.load-env-vars.outputs.BUILD_FLAGS }}
-            SIPP_SCENARIOS_LOCATION=${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}
-
-      - name: Run Docker image
-        run: |
-          set +e
-          docker run --rm \
-            --env-file .env \
-            -v "$PWD/sipp-scenarios/:${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}"
-            sipp:latest sipp -i 127.0.0.1 -p 50600 ${{inputs.remote_target}} -r ${{inputs.call_rate}} -rp ${{inputs.call_period}} -m ${{inputs.num_reqs}} -sf ${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}/options/options.xml
-          code=$?
-          set -e
-          if [ "$code" -ne 0 ]; then
-            exit $code
-          fi
+name: 'SIPp OPTIONS'
+description: 'Run SIPp OPTIONS against a target (checkouts sipp-docker)'
+inputs:
+  remote_target:
+    required: false
+    default: '127.0.0.1:5060'
+  num_reqs:
+    required: false
+    default: '1'
+  call_rate:
+    required: false
+    default: '1'
+  call_period:
+    required: false
+    default: '1000'
+  sipp_repo:
+    required: false
+    default: 'bundasmanu/sipp-docker'
+  sipp_ref:
+    required: false
+    default: 'main'
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout sipp-docker
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.sipp_repo }}
+        ref: ${{ inputs.sipp_ref }}
+        path: sipp-docker
+    - name: Build SIPp image
+      shell: bash
+      run: |
+        cd sipp-docker
+        docker build --target sipp -t sipp:latest .
+    - name: Run SIPp OPTIONS
+      shell: bash
+      run: |
+        docker run --rm --network host \
+          -v "${{ github.workspace }}/sipp-docker/sipp-scenarios:/opt" \
+          sipp:latest sipp -i 127.0.0.1 -p 50600 ${{ inputs.remote_target }} \
+          -r ${{ inputs.call_rate }} -rp ${{ inputs.call_period }} \
+          -m ${{ inputs.num_reqs }} -sf /opt/options/options.xml
