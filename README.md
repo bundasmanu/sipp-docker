@@ -74,6 +74,17 @@ docker run --rm \
   sipp:latest sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/register/register.xml -inf /opt/register/register.csv
 ```
 
+Run the same scenario with a **custom CSV file** by mounting it as an extra volume (e.g. `./my-register.csv` in the current directory):
+
+```sh
+docker run --rm \
+  --env-file .env \
+  -v "$PWD/sipp-scenarios/:/opt" \
+  -v "$PWD/audios/:/opt/audios" \
+  -v "$PWD/my-register.csv:/opt/register/my-register.csv" \
+  sipp:latest sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/register/register.xml -inf /opt/register/my-register.csv
+```
+
 Run a container in interactive shell mode:
 
 ```sh
