@@ -16,6 +16,7 @@ SIPp with Docker Compose support
         - [Execute SIPp scenario - inside container](#execute-sipp-scenario---inside-container)
   - [Reject Scenario](#reject-scenario)
   - [UAS sends BYE Scenario](#uas-sends-bye-scenario)
+  - [UAC sends cancel](#uac-sends-cancel)
   - [UAS forces Hold Scenario](#uas-forces-hold-scenario)
   - [UAC Re-Invites](#uac-re-invites)
   - [UAC as internal](#uac-as-internal)
@@ -142,6 +143,14 @@ docker compose run sipp sipp -i 172.25.0.10 -p 5060 172.25.0.3:5060 -r 1 -m 1 -s
 docker compose run sipp sipp -i 172.25.0.10 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uas/uas_sent_bye.xml -inf /opt/uas/uas.csv -nd -trace_screen -trace_msg  -message_file messages.log
 
 docker compose run sipp sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uac/uac_receives_bye.xml -inf /opt/uac/uac_from_internal.csv
+```
+
+## UAC sends cancel
+
+```sh
+docker compose run sipp sipp -i 172.25.0.10 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uas/uas_receives_cancel.xml -inf /opt/uas/uas.csv
+
+docker compose run sipp sipp -i 172.25.0.12 -p 5060 172.25.0.3:5060 -r 1 -m 1 -sf /opt/uac/uac_cancels.xml -inf /opt/uac/uac_from_internal.csv
 ```
 
 ## UAS forces Hold Scenario
