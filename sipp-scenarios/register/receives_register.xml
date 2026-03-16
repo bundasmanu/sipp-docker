@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<scenario name="register_endpoint">
+
+    <label id="badauth"/>
+    <recv request="REGISTER" crlf="true" rrs="true"/>
+
+    <send>
+        <![CDATA[
+            SIP/2.0 401 Authorization Required
+            [last_Via:]
+            [last_From:]
+            [last_To:];tag=[pid]SIPpTag01[call_number]
+            [last_Call-ID:]
+            [last_CSeq:]
+            Contact: <sip:[local_ip]:[local_port];transport=[transport]>
+            WWW-Authenticate: Digest realm="xpto.com", nonce="abe572m3uMN6H4//1jhGyN//i9fXKHya"
+            Content-Length: 0
+            ]]>
+        </send>
+
+    <recv request="REGISTER" crlf="true" rrs="true">
+        <action>
+            <ereg regexp="Digest .*username=\"([^\"]*)\"" search_in="hdr" header="Authorization:" assign_to="root_line,username" />
+            <lookup assign_to="line" file="register.csv" key="[$username]" />
+            <assign assign_to="root_line" value="0" />
+            <verifyauth assign_to="authvalid" username="[field0 line=\"[$line]\"]" password="[field2 line=\"[$line]\"]"/>
+        </action>
+    </recv>
+
+    <nop hide="true" test="authvalid" next="goodauth" />
+    <nop hide="true" next="badauth" />
+
+    <label id="goodauth"/>
+    <send retrans="500">
+        <![CDATA[
+            SIP/2.0 200 OK
+            [last_Via:]
+            [last_From:]
+            [last_To:];tag=[pid]SIPpTag00[call_number]
+            [last_Call-ID:]
+            [last_CSeq:]
+            Contact: <sip:[field0]@[local_ip]:[local_port];transport=[transport]>
+            Expires: [field4]
+            Content-Length: 0
+        ]]>
+    </send>
+
+    <!-- definition of the response time repartition table (unit is ms)   -->
+    <ResponseTimeRepartition value="10, 20, 30, 40, 50, 100, 150, 200"/>
+
+    <!-- definition of the call length repartition table (unit is ms)     -->
+    <CallLengthRepartition value="10, 50, 100, 500, 1000, 5000, 10000"/>
+</scenario>
