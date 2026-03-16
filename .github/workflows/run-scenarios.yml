@@ -1,0 +1,56 @@
+---
+
+name: Run all SIPp Scenarios
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  load-env-vars:
+    runs-on: ubuntu-latest
+    outputs:
+      DEBIAN_VERSION: ${{ env.DEBIAN_VERSION }}
+      SIPP_VERSION: ${{ env.SIPP_VERSION }}
+      BUILD_FLAGS: ${{ env.BUILD_FLAGS }}
+      SIPP_SCENARIOS_LOCATION: ${{ env.SIPP_SCENARIOS_LOCATION }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Load environment variables from .env
+        run: grep -v '^#' .env | grep -v '^$' >> $GITHUB_ENV
+
+  run-all-sipp-scenarios:
+    needs: load-env-vars
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create dedicated network
+        run: |
+          docker network create --opt com.docker.network.driver.mtu=9000 --subnet=172.25.0.0/24 common-network
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: sipp
+          push: false
+          load: true
+          tags: sipp:latest
+          platforms: linux/amd64
+          build-args: |
+            DEBIAN_VERSION=${{ needs.load-env-vars.outputs.DEBIAN_VERSION }}
+            SIPP_VERSION=${{ needs.load-env-vars.outputs.SIPP_VERSION }}
+            BUILD_FLAGS=${{ needs.load-env-vars.outputs.BUILD_FLAGS }}
+            SIPP_SCENARIOS_LOCATION=${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}
+
+      - name: Run scenario tests
+        env:
+          SIPP_SCENARIOS_LOCATION: ${{ needs.load-env-vars.outputs.SIPP_SCENARIOS_LOCATION }}
+        run: chmod +x .github/scripts/run-scenario-tests.sh && .github/scripts/run-scenario-tests.sh
